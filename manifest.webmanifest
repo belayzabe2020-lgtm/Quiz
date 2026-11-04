@@ -1,6 +1,6 @@
 {
- "name": "የጥያቄ መለማመጃ",
- "short_name": "ጥያቄ",
+ "name": "64 የእምነት ፈተና",
+ "short_name": "64 ፈተና",
  "description": "የሰንበት ትምህርት ቤት የጥያቄ መለማመጃ",
  "lang": "am",
  "start_url": "./",
@@ -8,7 +8,7 @@
  "display": "standalone",
  "orientation": "portrait",
  "background_color": "#F5F6F8",
- "theme_color": "#22305A",
+ "theme_color": "#0B3D9E",
  "icons": [
   {
    "src": "icon-192.png",
