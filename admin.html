@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="am"><head><meta charset="utf-8"><title>አድሚን – 64 የእምነት ፈተና</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<style>
+:root{--bg:#F5F6F8;--sf:#fff;--ink:#1B2338;--mute:#5B6478;--line:#DDE1EA;--brand:#0B3D9E;--bi:#fff;--gold:#B7862A;--ok:#1F7A4D;--bad:#B23B2E;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#10141F;--sf:#1A2133;--ink:#EEF0F6;--mute:#9AA3B8;--line:#2B3550;--brand:#8FA4E8;--bi:#10141F;--gold:#D9A94B;--ok:#5CC48C;--bad:#F08A7B;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 "Noto Sans Ethiopic","Nyala",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:14px 14px 110px}
+h1,h2{font-family:"Noto Serif Ethiopic","Nyala",serif;margin:6px 0 10px;color:var(--brand)}h1{font-size:24px}h2{font-size:19px}
+label{display:block;font-weight:600;margin:12px 0 4px}input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:6px;background:var(--sf);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border-radius:6px;padding:12px 16px;border:2px solid var(--brand)}.go{background:var(--brand);color:var(--bi);font-weight:600}.sec{background:none;color:var(--brand)}.bad{color:var(--bad);border-color:var(--bad)}
+.m{color:var(--mute);font-size:14px}.er{color:var(--bad);font-size:14px;word-break:break-word}.okm{color:var(--ok)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.it{display:flex;gap:10px;width:100%;text-align:left;background:var(--sf);border:1px solid var(--line);border-left:5px solid var(--gold);margin-top:8px;padding:10px 12px;color:var(--ink)}.it b{flex:none;color:var(--brand)}.it small{color:var(--mute);margin-left:auto;flex:none}
+.ed{background:var(--sf);border:2px solid var(--brand);border-radius:8px;padding:12px;margin:12px 0}.op{display:flex;align-items:center;gap:8px;margin-top:8px}.op input[type=radio]{width:22px;height:22px;flex:none}.op b{flex:none}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sv{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:2px solid var(--gold);padding:10px 14px}.sv div{max-width:720px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between}
+</style></head><body><main id="app"></main>
+<script>
+const A=document.getElementById('app'),$=s=>document.querySelector(s),LET=['ሀ','ለ','ሐ','መ'];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dec=b=>new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\n/g,'')),c=>c.charCodeAt(0)));
+const enc=s=>{let x='';new TextEncoder().encode(s).forEach(c=>x+=String.fromCharCode(c));return btoa(x)};
+const getc=()=>{try{return JSON.parse(localStorage.getItem('adm'))}catch(e){return null}};
+let S={idx:null,yi:0,bi:0,qs:[],sha:'',dirty:0,filter:'',ed:null,del:false,msg:'',ok:false};
+async function gh(path,opt){opt=opt||{};const c=getc();const put=opt.method==='PUT';
+ const r=await fetch('https://api.github.com/repos/'+c.repo+'/contents/'+path+(put?'':'?ref=main'),Object.assign({cache:'no-store'},opt,{headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+c.token}}));
+ if(!r.ok){const t=await r.text();throw new Error(r.status+(r.status===401?' (ቶኬኑ ልክ አይደለም)':r.status===409?' (ፋይሉ ተቀይሯል፤ እንደገና ይጫኑ)':'')+' '+t.slice(0,120))}return r.json()}
+function login(err){const c=getc()||{};A.innerHTML=`<h1>አድሚን መግቢያ</h1><p class="m">ቶኬኑ በዚህ ስልክ ውስጥ ብቻ ይቀመጣል፤ ለማንም አይላክም።</p><label>ማከማቻ (ባለቤት/ስም)</label><input id="rp" value="${esc(c.repo||'belayzabe2020-lgtm/Quiz')}"><label>GitHub ቶኬን</label><input id="tk" type="password" autocomplete="off"><p></p><button class="go" id="ok">ግባ</button><p class="er">${esc(err||'')}</p>`;
+ $('#ok').onclick=async()=>{localStorage.setItem('adm',JSON.stringify({repo:$('#rp').value.trim(),token:$('#tk').value.trim()}));try{await boot()}catch(e){localStorage.removeItem('adm');login('አልተሳካም፦ '+e.message)}}}
+async function boot(){const f=await gh('books.json');S.idx=JSON.parse(dec(f.content));await loadBook(0,0)}
+async function loadBook(yi,bi){A.innerHTML='<p class="m">በመጫን ላይ…</p>';S.yi=yi;S.bi=bi;S.dirty=0;S.ed=null;S.msg='';const b=S.idx.years[yi].books[bi];const f=await gh(b.file);S.sha=f.sha;S.qs=JSON.parse(dec(f.content));main()}
+function main(){const Y=S.idx.years,books=Y[S.yi].books;
+ const list=S.qs.map((q,i)=>({q,i})).filter(({q})=>!S.filter||(q.q+' '+q.options.join(' ')).includes(S.filter));
+ A.innerHTML=`<div class="bar"><h1>የጥያቄ አድሚን</h1><button class="sec" id="lo">ውጣ</button></div>
+ <div class="row2"><div><label>ዓመት</label><select id="sy">${Y.map((y,i)=>`<option value="${i}" ${i===S.yi?'selected':''}>${esc(y.name)}</option>`).join('')}</select></div>
+ <div><label>መጽሐፍ</label><select id="sb">${books.map((b,i)=>`<option value="${i}" ${i===S.bi?'selected':''}>${esc(b.title)}</option>`).join('')}</select></div></div>
+ <div class="bar" style="margin-top:12px"><input id="fl" placeholder="ጥያቄ ፈልግ…" value="${esc(S.filter)}" style="flex:1"><button class="go" id="nw">+ አዲስ ጥያቄ</button></div>
+ <p class="m">${S.qs.length} ጥያቄዎች${S.filter?` (የተገኙ ${list.length})`:''}</p>
+ ${S.ed!==null?editor():''}${S.msg?`<p class="${S.ok?'okm':'er'}">${esc(S.msg)}</p>`:''}
+ ${list.map(({q,i})=>`<button class="it" data-i="${i}"><b>${esc(q.id)}</b><span>${esc(q.q.slice(0,90))}</span><small>${LET[q.answer]||'?'}</small></button>`).join('')}
+ <div class="sv"><div><span class="${S.dirty?'er':'m'}">${S.dirty?'ያልተቀመጡ ለውጦች፦ '+S.dirty:'ምንም ለውጥ የለም'}</span><button class="go" id="sv" ${S.dirty?'':'disabled style="opacity:.4"'}>ወደ GitHub አስቀምጥ</button></div></div>`;
+ $('#lo').onclick=()=>{localStorage.removeItem('adm');login()};
+ const guard=()=>{if(S.dirty){S.msg='መጀመሪያ ለውጦቹን ያስቀምጡ።';S.ok=false;main();return true}};
+ $('#sy').onchange=e=>{if(guard())return;loadBook(+e.target.value,0).catch(x=>{S.msg=x.message;main()})};
+ $('#sb').onchange=e=>{if(guard())return;loadBook(S.yi,+e.target.value).catch(x=>{S.msg=x.message;main()})};
+ $('#fl').oninput=e=>{S.filter=e.target.value;const p=e.target.selectionStart;main();const f=$('#fl');f.focus();f.setSelectionRange(p,p)};
+ $('#nw').onclick=()=>{S.ed='new';S.del=false;S.msg='';main();scrollTo(0,0)};
+ document.querySelectorAll('.it').forEach(b=>b.onclick=()=>{S.ed=+b.dataset.i;S.del=false;S.msg='';main();scrollTo(0,0)});
+ $('#sv').onclick=save;
+ if(S.ed!==null){$('#cx').onclick=()=>{S.ed=null;main()};$('#ap').onclick=apply;const d=$('#dl');if(d)d.onclick=()=>{if(!S.del){S.del=true;main();return}S.qs.splice(S.ed,1);S.dirty++;S.ed=null;S.del=false;main()}}}
+function editor(){const n=S.ed==='new';const q=n?{id:Math.max(0,...S.qs.map(x=>+x.id||0))+1,chapter:S.qs.length?S.qs[S.qs.length-1].chapter:'',q:'',options:['','','',''],answer:0}:S.qs[S.ed];
+ return `<section class="ed"><h2>${n?'አዲስ ጥያቄ':'ጥያቄ '+esc(q.id)}</h2><label>ምዕራፍ</label><input id="ec" value="${esc(q.chapter)}"><label>ጥያቄ</label><textarea id="eq" rows="3">${esc(q.q)}</textarea>
+ ${q.options.map((o,k)=>`<div class="op"><input type="radio" name="a" value="${k}" ${q.answer===k?'checked':''}><b>${LET[k]}</b><input id="o${k}" value="${esc(o)}"></div>`).join('')}
+ <p class="m">ትክክለኛውን መልስ በክብ ምልክት ይምረጡ።</p><div class="btns"><button class="go" id="ap">ተግብር</button><button class="sec" id="cx">ተወው</button>${n?'':`<button class="sec bad" id="dl">${S.del?'እርግጠኛ ነዎት? እንደገና ንኩ':'ሰርዝ'}</button>`}</div><p class="er" id="er"></p></section>`}
+function apply(){const q=$('#eq').value.trim(),o=[0,1,2,3].map(k=>$('#o'+k).value.trim()),r=document.querySelector('input[name=a]:checked'),ch=$('#ec').value.trim(),er=$('#er');
+ if(!q)return er.textContent='ጥያቄው ባዶ ነው።';if(o.some(x=>!x))return er.textContent='አራቱም ምርጫዎች መሞላት አለባቸው።';if(new Set(o).size<4)return er.textContent='ሁለት ምርጫዎች ተመሳሳይ ናቸው።';if(!r)return er.textContent='ትክክለኛውን መልስ ይምረጡ።';
+ const nq={id:S.ed==='new'?Math.max(0,...S.qs.map(x=>+x.id||0))+1:S.qs[S.ed].id,chapter:ch,q,options:o,answer:+r.value};
+ if(S.ed==='new')S.qs.push(nq);else S.qs[S.ed]=nq;S.dirty++;S.ed=null;S.msg='';main()}
+async function save(){const bad=S.qs.find(q=>!(q&&q.q&&Array.isArray(q.options)&&q.options.length===4&&q.options.every(Boolean)&&Number.isInteger(q.answer)&&q.answer>=0&&q.answer<4));
+ if(bad){S.msg='ጥያቄ '+bad.id+' ያልተሟላ ነው፤ አልተቀመጠም።';S.ok=false;return main()}
+ try{S.msg='በማስቀመጥ ላይ…';S.ok=true;main();const b=S.idx.years[S.yi].books[S.bi];
+  const r=await gh(b.file,{method:'PUT',body:JSON.stringify({message:'Edit questions: '+b.title,content:enc(JSON.stringify(S.qs,null,1)),sha:S.sha,branch:'main'})});
+  S.sha=r.content.sha;S.dirty=0;S.ok=true;S.msg='✓ ተቀምጧል። ከ1–2 ደቂቃ በኋላ በአፑ ይታያል።'}catch(e){S.ok=false;S.msg='አልተቀመጠም፦ '+e.message}main()}
+getc()?boot().catch(e=>login('አልተሳካም፦ '+e.message)):login();
+</script></body></html>
